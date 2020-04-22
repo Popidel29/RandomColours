@@ -5,32 +5,32 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.randomcolours.common.model.ColoursWordEntity
-import com.example.randomcolours.common.model.Response
+import com.example.randomcolours.common.model.State
+
 import com.example.randomcolours.random_colours.RandomColours
 import com.example.randomcolours.repository.ColoursRepositoryInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 class ColoursWordViewModel(
     private val repository: ColoursRepositoryInterface,
     private val randomColoursGenerator: RandomColours
 ) : ViewModel() {
 
-    private var responseLiveData = MutableLiveData<Response>()
+    private var _state = MutableLiveData<State>()
 
-    val response: LiveData<Response>
-        get() = responseLiveData
+    val state: LiveData<State>
+        get() = _state
 
 
     fun loadColours(numberOfWord: Int) {
-        responseLiveData.value = Response.VALUE
+        _state.value = State.Loading
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val namesList: List<String> = repository.getColoursWordFromApi(numberOfWord)
+                val names: List<String> = repository.getColoursWordFromApi(numberOfWord)
                 val colorsListEntity = ArrayList<ColoursWordEntity>()
 
-                for (item in namesList) {
+                for (item in names) {
                     colorsListEntity.add(
                         (ColoursWordEntity(
                             item,
@@ -39,14 +39,14 @@ class ColoursWordViewModel(
                     )
                 }
 
-                responseLiveData.postValue(Response.ONSUCCESS(colorsListEntity))
+                _state.postValue(State.OnSuccess(colorsListEntity))
 
 
             } catch (exception: Exception) {
                 if (exception.message != null) {
-                    responseLiveData.postValue(Response.ONFAILURE(exception.message))
+                    _state.postValue(State.OnFailure(exception.message))
                 } else {
-                    responseLiveData.postValue(Response.ONFAILURE("No error Message!"))
+                    _state.postValue(State.OnFailure("No error Message!"))
                 }
             }
         }

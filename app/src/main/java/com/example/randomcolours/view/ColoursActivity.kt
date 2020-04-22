@@ -1,12 +1,11 @@
 package com.example.randomcolours.view
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.randomcolours.ColoursApplication
@@ -14,14 +13,13 @@ import com.example.randomcolours.R
 import com.example.randomcolours.common.COLOURS_WORDS
 import com.example.randomcolours.common.SHARED_PREFERENCES_COLOURS_KEY
 import com.example.randomcolours.common.model.ColoursWordEntity
-import com.example.randomcolours.common.model.Response
+import com.example.randomcolours.common.model.State
 import com.example.randomcolours.dagger.component.DaggerMainActivityComponent
 import com.example.randomcolours.dagger.module.ColoursViewModelModule
 import com.example.randomcolours.viewmodel.ColoursWordViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
-import java.lang.Exception
 import java.lang.reflect.Type
 import javax.inject.Inject
 
@@ -56,16 +54,16 @@ class ColoursActivity : AppCompatActivity() {
     }
 
     private fun initiateLiveData() {
-        wordViewModel.response.observe(this, Observer {
+        wordViewModel.state.observe(this, Observer {
             when(it)
             {
-                is Response.ONSUCCESS -> {
+                is State.OnSuccess -> {
                     saveDataToSharedPreferences(it.listOfWords)
                     displayColours(it.listOfWords)
                     hideErrorMessage()
                 }
 
-                is Response.ONFAILURE -> {
+                is State.OnFailure -> {
                     displayErrorMessage(it.errorMessage)
                 }
             }

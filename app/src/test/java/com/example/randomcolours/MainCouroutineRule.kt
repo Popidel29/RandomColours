@@ -1,4 +1,4 @@
-package com.example.colours_ao_test
+package com.example.randomcolours
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

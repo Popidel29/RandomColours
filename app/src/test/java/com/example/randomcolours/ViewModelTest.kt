@@ -1,15 +1,11 @@
 package com.example.randomcolours
 
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.example.colours_ao_test.MainCoroutinesRule
 import com.example.randomcolours.common.model.ColoursWordEntity
-import com.example.randomcolours.common.model.Response
+import com.example.randomcolours.common.model.State
 import com.example.randomcolours.random_colours.RandomColours
 import com.example.randomcolours.repository.ColoursRepositoryImpl
-import com.example.randomcolours.repository.ColoursRepositoryInterface
 import com.example.randomcolours.viewmodel.ColoursWordViewModel
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -17,6 +13,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.SpyK
 import io.mockk.spyk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -28,6 +25,7 @@ class ViewModelTest {
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
 
+    @ExperimentalCoroutinesApi
     @get:Rule
     val coroutinesRule = MainCoroutinesRule()
 
@@ -40,48 +38,56 @@ class ViewModelTest {
     private lateinit var randomColours: RandomColours
 
     @SpyK
-    var responseObserver = Observer<Response>{}
+    var responseObserver = Observer<State> {}
 
     @Before
-    fun setUp(){
+    fun setUp() {
         MockKAnnotations.init(this)
 
-        coloursWordViewModel = spyk((ColoursWordViewModel(coloursRepositoryImpl,randomColours)))
-        coloursWordViewModel.response.observeForever(responseObserver)
+        coloursWordViewModel = spyk((ColoursWordViewModel(coloursRepositoryImpl, randomColours)))
+        coloursWordViewModel.state.observeForever(responseObserver)
     }
 
     @Test
-    fun  `Testing ViewModel when server responses with data`(){
+    fun `Testing ViewModel when server responses with data`() {
         //Setup
-        val result = Response.ONSUCCESS(listOf<ColoursWordEntity>())
+        val repositoryNames = listOf("test0", "test1", "test2", "teste3", "teste4")
+        val colour = "#FFFFFF"
+
+        val entities = listOf(
+            ColoursWordEntity("test0", colour), ColoursWordEntity("test1", colour)
+            , ColoursWordEntity("test2", colour), ColoursWordEntity("test3", colour),
+            ColoursWordEntity("test4", colour)
+        )
+        val result = State.OnSuccess(entities)
+
 
         //given
         coEvery {
             coloursRepositoryImpl.getColoursWordFromApi(5)
-        } returns listOf("test0,test1,test2,teste3,teste4")
+        } returns repositoryNames
 
         coEvery {
             randomColours.generateHexadecimal()
-        } returns "#FFFFFF"
+        } returns colour
 
         //when
         coloursWordViewModel.loadColours(5)
 
         //Then
-        verify { responseObserver.onChanged(result)}
-
-        var i : Int = 0
-        var expectedResult : Boolean = true
-
-        for (item in result.listOfWords)
-        {
-            if(item.colourName != "test"+i || item.hexadecimal != "#FFFFFF")
-            {
-                expectedResult = false
-            }
-            i++
-        }
-
-        Assert.assertTrue(expectedResult)
+        verify { responseObserver.onChanged(State.Loading) }
+        verify { responseObserver.onChanged(result) }
     }
 }
+/* var i : Int = 0
+var expectedResult : Boolean = true
+
+for (item in result.listOfWords){
+    if(item.colourName != "test"+i || item.hexadecimal != "#FFFFFF")
+    {
+        expectedResult = false
+    }
+    i++
+}*/
+
+ // Assert.assertTrue(expectedResult)
