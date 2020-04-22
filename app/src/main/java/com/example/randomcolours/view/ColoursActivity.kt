@@ -141,7 +141,7 @@ class ColoursActivity : AppCompatActivity() {
         }
         catch(exception: Exception){
             displayErrorMessage("Error converting to Gson")
-            return "Message"
+            return " "
         }
 
     }
