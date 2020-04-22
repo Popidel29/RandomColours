@@ -21,6 +21,7 @@ import com.example.randomcolours.viewmodel.ColoursWordViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.Exception
 import java.lang.reflect.Type
 import javax.inject.Inject
 
@@ -43,7 +44,7 @@ class ColoursActivity : AppCompatActivity() {
 
         val coloursList = getDataFromSharedPreferences()
         if (coloursList.isNotEmpty()) {
-            DisplayColours(coloursList)
+            displayColours(coloursList)
         }
 
         initiateLiveData()
@@ -60,7 +61,7 @@ class ColoursActivity : AppCompatActivity() {
             {
                 is Response.ONSUCCESS -> {
                     saveDataToSharedPreferences(it.listOfWords)
-                    DisplayColours(it.listOfWords)
+                    displayColours(it.listOfWords)
                     hideErrorMessage()
                 }
 
@@ -99,7 +100,7 @@ class ColoursActivity : AppCompatActivity() {
         pb_loading_colours.visibility = View.GONE
     }
 
-    private fun DisplayColours(coloursList: List<ColoursWordEntity>) {
+    private fun displayColours(coloursList: List<ColoursWordEntity>) {
         rv_colours.apply {
             adapter = ColoursAdapter(coloursList)
             layoutManager = LinearLayoutManager(this@ColoursActivity)
@@ -121,13 +122,27 @@ class ColoursActivity : AppCompatActivity() {
     }
 
     private fun convertFromStringOfGsonToListOfColoursEntity(gsonList: String): List<ColoursWordEntity> {
-        val gson = Gson()
-        val type: Type = object : TypeToken<List<ColoursWordEntity>>() {}.type
-        return gson.fromJson(gsonList, type)
+        try{
+            val gson = Gson()
+            val type: Type = object : TypeToken<List<ColoursWordEntity>>() {}.type
+            return gson.fromJson(gsonList, type)
+        }
+        catch(exception:Exception){
+            displayErrorMessage("Error converting from Gson")
+            return  listOf<ColoursWordEntity>()
+        }
+
     }
 
     private fun convertFromListOfColoursEntityToStringOfGson(coloursEntityList: List<ColoursWordEntity>): String {
-        val gson = Gson()
-        return gson.toJson(coloursEntityList)
+        try{
+            val gson = Gson()
+            return gson.toJson(coloursEntityList)
+        }
+        catch(exception: Exception){
+            displayErrorMessage("Error converting to Gson")
+            return "Message"
+        }
+
     }
 }

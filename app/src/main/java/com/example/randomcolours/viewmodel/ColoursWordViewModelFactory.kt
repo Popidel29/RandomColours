@@ -8,10 +8,10 @@ import javax.inject.Inject
 
 class ColoursWordViewModelFactory @Inject constructor(
     private val repository: ColoursRepositoryInterface,
-    private val randonColoursGenerator: RandomColours
+    private val randomColoursGenerator: RandomColours
 ): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return ColoursWordViewModel(repository,randonColoursGenerator) as T
+        return ColoursWordViewModel(repository,randomColoursGenerator) as T
     }
 
 }

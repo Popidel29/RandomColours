@@ -8,12 +8,12 @@ class RandomColours {
         fun create(): RandomColours = RandomColours()
     }
 
-    fun randomNumbers() : Int{
+   private fun randomNumbers() : Int{
         return Random.nextInt(15)
 
     }
 
-    fun convertToHexadecimal(number: Int): Char {
+   private fun convertToHexadecimal(number: Int): Char {
         return when (number) {
             0 -> '0'
             1 -> '1'

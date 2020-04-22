@@ -14,7 +14,7 @@ import java.lang.Exception
 
 class ColoursWordViewModel(
     private val repository: ColoursRepositoryInterface,
-    private val randonColoursGenerator: RandomColours
+    private val randomColoursGenerator: RandomColours
 ) : ViewModel() {
 
     private var responseLiveData = MutableLiveData<Response>()
@@ -34,7 +34,7 @@ class ColoursWordViewModel(
                     colorsListEntity.add(
                         (ColoursWordEntity(
                             item,
-                            randonColoursGenerator.generateHexadecimal()
+                            randomColoursGenerator.generateHexadecimal()
                         ))
                     )
                 }
