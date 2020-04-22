@@ -18,6 +18,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.lang.RuntimeException
 
 
 class ViewModelTest {
@@ -51,7 +52,7 @@ class ViewModelTest {
     @Test
     fun `Testing ViewModel when server responses with data`() {
         //Setup
-        val repositoryNames = listOf("test0", "test1", "test2", "teste3", "teste4")
+        val repositoryNames = listOf("test0", "test1", "test2", "test3", "test4")
         val colour = "#FFFFFF"
 
         val entities = listOf(
@@ -78,16 +79,26 @@ class ViewModelTest {
         verify { responseObserver.onChanged(State.Loading) }
         verify { responseObserver.onChanged(result) }
     }
-}
-/* var i : Int = 0
-var expectedResult : Boolean = true
 
-for (item in result.listOfWords){
-    if(item.colourName != "test"+i || item.hexadecimal != "#FFFFFF")
-    {
-        expectedResult = false
+    @Test
+    fun `Testing ViewModel when server responses with error`() {
+        //Setup
+        val error = "errorMessage"
+
+        val result = State.OnFailure(error)
+
+
+        //given
+        coEvery {
+            coloursRepositoryImpl.getColoursWordFromApi(5)
+        } throws RuntimeException(error)
+
+        //when
+        coloursWordViewModel.loadColours(5)
+
+        //Then
+        verify { responseObserver.onChanged(State.Loading) }
+        verify { responseObserver.onChanged(result) }
     }
-    i++
-}*/
+}
 
- // Assert.assertTrue(expectedResult)
