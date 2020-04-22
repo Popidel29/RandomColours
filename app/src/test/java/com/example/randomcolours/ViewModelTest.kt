@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer
 import com.example.colours_ao_test.MainCoroutinesRule
 import com.example.randomcolours.common.model.ColoursWordEntity
 import com.example.randomcolours.common.model.Response
+import com.example.randomcolours.random_colours.RandomColours
 import com.example.randomcolours.repository.ColoursRepositoryImpl
 import com.example.randomcolours.repository.ColoursRepositoryInterface
 import com.example.randomcolours.viewmodel.ColoursWordViewModel
@@ -14,6 +15,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.SpyK
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.Assert
 import org.junit.Before
@@ -34,31 +36,52 @@ class ViewModelTest {
     @MockK
     private lateinit var coloursRepositoryImpl: ColoursRepositoryImpl
 
-   @SpyK
-   var responseObserver = Observer<Response>{}
+    @MockK
+    private lateinit var randomColours: RandomColours
+
+    @SpyK
+    var responseObserver = Observer<Response>{}
 
     @Before
     fun setUp(){
-        coloursWordViewModel = ColoursWordViewModel(coloursRepositoryImpl)
         MockKAnnotations.init(this)
+
+        coloursWordViewModel = spyk((ColoursWordViewModel(coloursRepositoryImpl,randomColours)))
         coloursWordViewModel.response.observeForever(responseObserver)
     }
 
     @Test
     fun  `Testing ViewModel when server responses with data`(){
+        //Setup
+        val result = Response.ONSUCCESS(listOf<ColoursWordEntity>())
+
         //given
         coEvery {
             coloursRepositoryImpl.getColoursWordFromApi(5)
-        } returns listOf("test,test1,test2,teste3,teste4")
+        } returns listOf("test0,test1,test2,teste3,teste4")
+
+        coEvery {
+            randomColours.generateHexadecimal()
+        } returns "#FFFFFF"
 
         //when
         coloursWordViewModel.loadColours(5)
 
         //Then
-        var res = Response.VALUE
+        verify { responseObserver.onChanged(result)}
 
-        verify { responseObserver.onChanged(res)}
+        var i : Int = 0
+        var expectedResult : Boolean = true
 
-        Assert.assertEquals(res, coloursWordViewModel.response.value)
+        for (item in result.listOfWords)
+        {
+            if(item.colourName != "test"+i || item.hexadecimal != "#FFFFFF")
+            {
+                expectedResult = false
+            }
+            i++
+        }
+
+        Assert.assertTrue(expectedResult)
     }
 }

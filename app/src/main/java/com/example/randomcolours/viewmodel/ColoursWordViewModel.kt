@@ -12,10 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
-class ColoursWordViewModel(private val repository: ColoursRepositoryInterface) : ViewModel() {
-
-
-    private val randonColoursGenerator = RandomColours.create()
+class ColoursWordViewModel(private val repository: ColoursRepositoryInterface,
+private val randonColoursGenerator: RandomColours) : ViewModel() {
 
     private var responseLiveData = MutableLiveData<Response>()
 

@@ -3,6 +3,7 @@ package com.example.randomcolours.dagger.module
 import androidx.lifecycle.ViewModelProvider
 import com.example.randomcolours.common.network.ColoursWordClient
 import com.example.randomcolours.dagger.MainActivityScope
+import com.example.randomcolours.random_colours.RandomColours
 import com.example.randomcolours.repository.ColoursRepositoryImpl
 import com.example.randomcolours.repository.ColoursRepositoryInterface
 import com.example.randomcolours.view.ColoursActivity
@@ -26,5 +27,12 @@ class ColoursViewModelModule(private val coloursActivity: ColoursActivity) {
     @MainActivityScope
     fun providesColoursRepository(coloursWordClient: ColoursWordClient): ColoursRepositoryInterface{
         return ColoursRepositoryImpl(coloursWordClient)
+    }
+
+
+    @Provides
+    @MainActivityScope
+    fun providesRandomColourGenerator() : RandomColours {
+        return RandomColours.create()
     }
 }

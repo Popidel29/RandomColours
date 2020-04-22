@@ -2,6 +2,7 @@ package com.example.randomcolours.dagger.module
 
 import com.example.randomcolours.common.BASE_URL
 import com.example.randomcolours.common.network.ColoursWordClient
+import com.example.randomcolours.random_colours.RandomColours
 import com.example.randomcolours.repository.ColoursRepositoryImpl
 import com.example.randomcolours.repository.ColoursRepositoryInterface
 import dagger.Module
