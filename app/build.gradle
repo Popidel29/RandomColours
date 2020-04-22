@@ -66,6 +66,12 @@ dependencies {
     // Test rule for LiveData
     testImplementation "androidx.arch.core:core-testing:$livedata_rule_version"
 
-    // Mockito
-    testImplementation "org.mockito:mockito-core:$mockito_version"
+    //MockK
+    testImplementation "io.mockk:mockk:1.10.0"
+
+    //tests
+    def coroutines_test_version = '1.3.4'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_test_version"
+
+    testImplementation 'androidx.arch.core:core-testing:2.1.0'
 }

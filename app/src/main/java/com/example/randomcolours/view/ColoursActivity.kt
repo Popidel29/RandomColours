@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.randomcolours.ColoursApplication
@@ -11,6 +12,7 @@ import com.example.randomcolours.R
 import com.example.randomcolours.common.COLOURS_WORDS
 import com.example.randomcolours.common.SHARED_PREFERENCES_COLOURS_KEY
 import com.example.randomcolours.common.model.ColoursWordEntity
+import com.example.randomcolours.common.model.Response
 import com.example.randomcolours.dagger.component.DaggerMainActivityComponent
 import com.example.randomcolours.dagger.module.ColoursViewModelModule
 import com.example.randomcolours.viewmodel.ColoursWordViewModel
@@ -31,71 +33,85 @@ class ColoursActivity : AppCompatActivity() {
 
 
         DaggerMainActivityComponent.builder().coloursApplicationComponent(
-            (application as ColoursApplication).getApplicationComponent()).coloursViewModelModule(
-            ColoursViewModelModule(this)).build().inject(this)
+            (application as ColoursApplication).getApplicationComponent()
+        ).coloursViewModelModule(
+            ColoursViewModelModule(this)
+        ).build().inject(this)
 
 
         val coloursList = getDataFromSharedPreferences()
-        if(coloursList.isNotEmpty())
-        {
+        if (coloursList.isNotEmpty()) {
             DisplayColours(coloursList)
         }
 
         initiateLiveData()
 
         btn_change_colour.setOnClickListener {
+            progressBarShow()
             wordViewModel.loadColours(COLOURS_WORDS)
         }
     }
 
-    private fun initiateLiveData()
-    {
-        wordViewModel.colours.observe(this, Observer {
-            saveDataToSharedPreferences(it)
-            DisplayColours(it)
-        })
+    private fun initiateLiveData() {
+        wordViewModel.response.observe(this, Observer {
+            when(it)
+            {
+                is Response.ONSUCCESS -> {
+                    saveDataToSharedPreferences(it.listOfWords)
+                    DisplayColours(it.listOfWords)
+                }
 
-        wordViewModel.errorMessage.observe(this, Observer {
-
+                is Response.ONFAILURE -> {
+                    Toast.makeText(this, it.errorMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
         })
     }
 
-    private fun getDataFromSharedPreferences() : List<ColoursWordEntity>
-    {
+    private fun getDataFromSharedPreferences(): List<ColoursWordEntity> {
         val preferences = this.getPreferences(Context.MODE_PRIVATE)
-        val json : String = preferences.getString(SHARED_PREFERENCES_COLOURS_KEY, null)
+        val json: String = preferences.getString(SHARED_PREFERENCES_COLOURS_KEY, null)
             ?: return arrayListOf()
 
-        return  convertFromStringOfGsonToListOfColoursEntity(json)
+        return convertFromStringOfGsonToListOfColoursEntity(json)
 
     }
 
-    private fun saveDataToSharedPreferences(coloursList : List<ColoursWordEntity>)
-    {
+    private fun saveDataToSharedPreferences(coloursList: List<ColoursWordEntity>) {
         val preferences = this.getPreferences(Context.MODE_PRIVATE)
         val editor = preferences.edit()
-        editor.putString(SHARED_PREFERENCES_COLOURS_KEY,
-            convertFromListOfColoursEntityToStringOfGson(coloursList))
+        editor.putString(
+            SHARED_PREFERENCES_COLOURS_KEY,
+            convertFromListOfColoursEntityToStringOfGson(coloursList)
+        )
+
+        editor.apply()
     }
 
-    private fun DisplayColours(coloursList : List<ColoursWordEntity>)
-    {
+    private fun progressBarShow() {
+        pb_loading_colours.visibility = View.VISIBLE
+    }
+
+    private fun progressBarHide() {
+        pb_loading_colours.visibility = View.GONE
+    }
+
+    private fun DisplayColours(coloursList: List<ColoursWordEntity>) {
         rv_colours.apply {
             adapter = ColoursAdapter(coloursList)
             layoutManager = LinearLayoutManager(this@ColoursActivity)
             visibility = View.VISIBLE
         }
+        progressBarHide()
     }
 
-    private fun convertFromStringOfGsonToListOfColoursEntity(gsonList : String) : List<ColoursWordEntity>
-    {
+    private fun convertFromStringOfGsonToListOfColoursEntity(gsonList: String): List<ColoursWordEntity> {
         val gson = Gson()
         val type: Type = object : TypeToken<List<ColoursWordEntity>>() {}.type
-        return gson.fromJson(gsonList,type)
+        return gson.fromJson(gsonList, type)
     }
 
-    private fun convertFromListOfColoursEntityToStringOfGson(coloursEntityList :List<ColoursWordEntity>) : String
-    {
+    private fun convertFromListOfColoursEntityToStringOfGson(coloursEntityList: List<ColoursWordEntity>): String {
         val gson = Gson()
         return gson.toJson(coloursEntityList)
     }

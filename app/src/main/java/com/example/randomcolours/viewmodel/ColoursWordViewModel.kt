@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.randomcolours.common.model.ColoursWordEntity
+import com.example.randomcolours.common.model.Response
 import com.example.randomcolours.random_colours.RandomColours
 import com.example.randomcolours.repository.ColoursRepositoryInterface
 import kotlinx.coroutines.Dispatchers
@@ -13,18 +14,17 @@ import java.lang.Exception
 
 class ColoursWordViewModel(private val repository: ColoursRepositoryInterface) : ViewModel() {
 
-    private val colourList = MutableLiveData<List<ColoursWordEntity>>()
+
     private val randonColoursGenerator = RandomColours.create()
 
-    val colours: LiveData<List<ColoursWordEntity>>
-        get() = colourList
+    private var responseLiveData = MutableLiveData<Response>()
 
+    val response : LiveData<Response>
+        get() = responseLiveData
 
-    private val mErrorMessage = MutableLiveData<String>()
-    val errorMessage: LiveData<String>
-        get() = mErrorMessage
 
     fun loadColours(numberOfWord: Int) {
+        responseLiveData.value = Response.VALUE
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val namesList : List<String>  = repository.getColoursWordFromApi(numberOfWord)
@@ -35,11 +35,14 @@ class ColoursWordViewModel(private val repository: ColoursRepositoryInterface) :
                        randonColoursGenerator.generateHexadecimal())))
                 }
 
-                colourList.postValue(colorsListEntity)
+                responseLiveData.postValue(Response.ONSUCCESS(colorsListEntity))
+
+
             } catch (exception: Exception) {
-                mErrorMessage.postValue(exception.message)
+                responseLiveData.postValue(Response.ONFAILURE(exception.message))
             }
         }
     }
+
 
 }
