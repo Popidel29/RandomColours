@@ -12,12 +12,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
-class ColoursWordViewModel(private val repository: ColoursRepositoryInterface,
-private val randonColoursGenerator: RandomColours) : ViewModel() {
+class ColoursWordViewModel(
+    private val repository: ColoursRepositoryInterface,
+    private val randonColoursGenerator: RandomColours
+) : ViewModel() {
 
     private var responseLiveData = MutableLiveData<Response>()
 
-    val response : LiveData<Response>
+    val response: LiveData<Response>
         get() = responseLiveData
 
 
@@ -25,22 +27,28 @@ private val randonColoursGenerator: RandomColours) : ViewModel() {
         responseLiveData.value = Response.VALUE
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val namesList : List<String>  = repository.getColoursWordFromApi(numberOfWord)
+                val namesList: List<String> = repository.getColoursWordFromApi(numberOfWord)
                 val colorsListEntity = ArrayList<ColoursWordEntity>()
 
                 for (item in namesList) {
-                   colorsListEntity.add((ColoursWordEntity(item,
-                       randonColoursGenerator.generateHexadecimal())))
+                    colorsListEntity.add(
+                        (ColoursWordEntity(
+                            item,
+                            randonColoursGenerator.generateHexadecimal()
+                        ))
+                    )
                 }
 
                 responseLiveData.postValue(Response.ONSUCCESS(colorsListEntity))
 
 
             } catch (exception: Exception) {
-                responseLiveData.postValue(Response.ONFAILURE(exception.message))
+                if (exception.message != null) {
+                    responseLiveData.postValue(Response.ONFAILURE(exception.message))
+                } else {
+                    responseLiveData.postValue(Response.ONFAILURE("No error Message!"))
+                }
             }
         }
     }
-
-
 }

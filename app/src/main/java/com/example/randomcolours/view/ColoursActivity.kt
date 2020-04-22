@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -59,10 +61,11 @@ class ColoursActivity : AppCompatActivity() {
                 is Response.ONSUCCESS -> {
                     saveDataToSharedPreferences(it.listOfWords)
                     DisplayColours(it.listOfWords)
+                    hideErrorMessage()
                 }
 
                 is Response.ONFAILURE -> {
-                    Toast.makeText(this, it.errorMessage, Toast.LENGTH_SHORT).show()
+                    displayErrorMessage(it.errorMessage)
                 }
             }
         })
@@ -103,6 +106,18 @@ class ColoursActivity : AppCompatActivity() {
             visibility = View.VISIBLE
         }
         progressBarHide()
+    }
+    private fun displayErrorMessage(errorMessgae : String?){
+        rv_colours.visibility = GONE
+        tv_errorMessage.text = errorMessgae
+        tv_errorMessage.visibility = VISIBLE
+        progressBarHide()
+    }
+
+    private fun hideErrorMessage(){
+        rv_colours.visibility = VISIBLE
+        tv_errorMessage.text = ""
+        tv_errorMessage.visibility = GONE
     }
 
     private fun convertFromStringOfGsonToListOfColoursEntity(gsonList: String): List<ColoursWordEntity> {
